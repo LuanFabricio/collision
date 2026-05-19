@@ -1,11 +1,10 @@
 package main
 
-import "vendor:raylib"
+import rl "vendor:raylib"
 import "core:fmt"
 
 import "src/collision"
 
-rl :: raylib
 
 WINDOW_WIDTH :: 720
 WINDOW_HEIGHT :: 480
@@ -13,7 +12,17 @@ WINDOW_TITLE :: "Collision"
 
 Container :: struct {
 	aabb_items: [dynamic]collision.AABB,
+	aabb_colors: [dynamic]rl.Color,
 	selected_item: ^collision.AABB
+}
+
+container_append_aabb :: proc(
+	container: ^Container,
+	aabb: collision.AABB,
+	color: rl.Color = rl.RED
+) {
+	append(&container.aabb_items, aabb)
+	append(&container.aabb_colors, color)
 }
 
 main :: proc() {
@@ -21,30 +30,30 @@ main :: proc() {
 
 	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
-	aabb := collision.AABB{
-		left = 42,
-		right = 84,
-		top = 42,
-		bottom = 84,
-	}
-
-	drag_item: ^collision.AABB = nil
-
 	container := Container{
 		selected_item = nil,
 	}
-	append(&container.aabb_items, collision.AABB{
-		left = 42,
-		right = 84,
-		top = 42,
-		bottom = 84,
-	})
-	append(&container.aabb_items, collision.AABB{
-		left = 0,
-		right = 42,
-		top = 0,
-		bottom = 42,
-	})
+	container_append_aabb(
+		&container,
+		collision.AABB{
+			left = 42,
+			right = 42*4,
+			top = 42,
+			bottom = 42*4,
+		},
+		rl.BLUE,
+	)
+
+	container_append_aabb(
+		&container,
+		collision.AABB{
+			left = 0,
+			right = 42*3,
+			top = 0,
+			bottom = 42*3,
+		},
+		rl.RED
+	)
 
 	for !rl.WindowShouldClose() {
 		draw(container)
@@ -55,7 +64,7 @@ main :: proc() {
 			for j in i+1..<aabb_items_len {
 				aabb2 := container.aabb_items[j]
 				if (collision.aabb_check(aabb1, aabb2)) {
-					fmt.printf("Collisin between idxs %d and %d\n", i, j)
+					fmt.printf("Colliding between idxs %d and %d\n", i, j)
 				}
 			}
 		}
@@ -67,8 +76,9 @@ draw :: proc(container: Container) {
 
 	rl.ClearBackground(rl.BLACK)
 
-	for aabb in container.aabb_items {
-		collision.draw_aabb(aabb, rl.BLUE)
+	for aabb, i in container.aabb_items {
+		color := container.aabb_colors[i]
+		collision.draw_aabb(aabb, color)
 	}
 
 	rl.EndDrawing()
@@ -90,6 +100,7 @@ update_loop :: proc(container: ^Container) {
 	}
 
 	if (container.selected_item != nil) {
-		collision.aabb_update_position(container.selected_item, mouse)
+		// collision.aabb_update_position(container.selected_item, mouse)
+		collision.aabb_update_position_with_collision(container.selected_item, mouse, container.aabb_items[:])
 	}
 }

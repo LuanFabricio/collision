@@ -88,3 +88,26 @@ aabb_check_point_should_collide_with_point :: proc(t: ^testing.T) {
 
 	testing.expect(t, collision.aabb_check_point(AABB, POINT))
 }
+
+@(test)
+aabb_check_aabb_should_collide :: proc(t: ^testing.T) {
+	aabb1 := collision.AABB{
+		left = 0,
+		top = 0,
+		right = 32,
+		bottom = 32,
+	}
+
+	aabb2 := collision.AABB{
+		left = 16,
+		top = 16,
+		right = 48,
+		bottom = 48,
+	}
+
+	testing.expect(t, collision.aabb_check(aabb1, aabb2))
+
+	aabb1.left -= 17
+	aabb1.right -= 17
+	testing.expect(t, !collision.aabb_check(aabb1, aabb2))
+}

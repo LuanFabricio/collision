@@ -3,7 +3,7 @@ package main
 import "vendor:raylib"
 import "core:fmt"
 
-import "collision"
+import "src/collision"
 
 rl :: raylib
 

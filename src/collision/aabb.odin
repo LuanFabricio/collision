@@ -48,3 +48,13 @@ aabb_check_point :: proc(aabb: AABB, point: Point) -> bool {
 	y_check := aabb.top <= point.y && aabb.bottom >= point.y
 	return x_check && y_check
 }
+
+aabb_check :: proc(aabb1: AABB, aabb2: AABB) -> bool {
+	x_collision := (aabb2.left <= aabb1.left && aabb1.left <= aabb2.right) ||
+		(aabb1.left <= aabb2.left && aabb2.left <= aabb1.right)
+
+	y_collision := (aabb2.top <= aabb1.top && aabb1.top <= aabb2.bottom) ||
+		(aabb1.top <= aabb2.top && aabb2.top <= aabb1.bottom)
+
+	return x_collision && y_collision
+}

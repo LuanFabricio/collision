@@ -4,6 +4,7 @@ import rl "vendor:raylib"
 import "core:fmt"
 
 import "src/collision"
+import "src/input"
 
 
 WINDOW_WIDTH :: 720
@@ -29,6 +30,7 @@ main :: proc() {
 	fmt.println("Hello, world!")
 
 	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+	rl.SetTargetFPS(60)
 
 	container := Container{
 		selected_item = nil,
@@ -57,7 +59,7 @@ main :: proc() {
 
 	for !rl.WindowShouldClose() {
 		draw(container)
-		update_loop(&container)
+		update_loop(&container, rl.GetFrameTime())
 
 		aabb_items_len := len(container.aabb_items)
 		for aabb1, i in container.aabb_items {
@@ -81,10 +83,12 @@ draw :: proc(container: Container) {
 		collision.draw_aabb(aabb, color)
 	}
 
+	rl.DrawFPS(10, 10)
+
 	rl.EndDrawing()
 }
 
-update_loop :: proc(container: ^Container) {
+update_loop :: proc(container: ^Container, frame_time: f32) {
 	mouse := collision.vector2_to_point(rl.GetMousePosition())
 	if (rl.IsMouseButtonPressed(rl.MouseButton.LEFT)) {
 		if (container.selected_item == nil) {
@@ -100,7 +104,20 @@ update_loop :: proc(container: ^Container) {
 	}
 
 	if (container.selected_item != nil) {
+		item := container.selected_item
 		// collision.aabb_update_position(container.selected_item, mouse)
-		collision.aabb_update_position_with_collision(container.selected_item, mouse, container.aabb_items[:])
+		w := collision.aabb_width(item^)
+		h := collision.aabb_height(item^)
+		move_vec := rl.Vector2({
+			f32(item.left + w / 2),
+			f32(item.top + h / 2)
+		}) + input.input_get_move_vector2() * 320 * rl.GetFrameTime()
+		collision.aabb_update_position_with_collision(
+			item,
+			collision.vector2_to_point(move_vec),
+			container.aabb_items[:])
+
+		fmt.printfln("Move vec: %f, %f", move_vec.x, move_vec.y)
+		fmt.printfln("AABB[%p]: %d, %d, %d, %d", item, item.left, item.top, item.right, item.bottom)
 	}
 }

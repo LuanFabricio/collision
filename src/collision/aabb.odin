@@ -77,9 +77,8 @@ aabb_update_position_with_collision :: proc(aabb: ^AABB, point: Point, aabbs: []
 
 	result_aabb := new_aabb
 	if collide_with != nil {
-		// NOTE: Check by diff between new_aab and collided item
-		x_diff := new_aabb.left - aabb.left
-		y_diff := new_aabb.top - aabb.top
+		x_diff := -new_aabb.left + collide_with.left
+		y_diff := -new_aabb.top + collide_with.top
 		if x_diff != 0 && abs(x_diff) >= abs(y_diff) {
 			fixed_aabb := aabb_handle_x_axis_collision(result_aabb, collide_with^, x_diff)
 			if !aabb_check(fixed_aabb, collide_with^) {

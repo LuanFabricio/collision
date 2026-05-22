@@ -1,6 +1,5 @@
 package input
 
-import "core:fmt"
 import rl "vendor:raylib"
 
 KEY_MOVE_UP :: rl.KeyboardKey.W
@@ -21,14 +20,6 @@ input_get_move_vector2 :: proc() -> rl.Vector2 {
  		if rl.IsKeyDown(key) {
 			move_vector += move
 		}
-	}
-
-	if rl.IsKeyPressed(KEY_MOVE_DOWN) {
-		move_vector.y += 1
-	}
-
-	if rl.IsKeyPressed(KEY_MOVE_UP) {
-		move_vector.y -= 1
 	}
 
 	return rl.Vector2Normalize(move_vector)

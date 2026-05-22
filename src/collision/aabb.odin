@@ -1,37 +1,27 @@
 package collision
 
-import "core:fmt"
-import rl "vendor:raylib"
-
 AABB :: struct {
-	left: i32,
-	right: i32,
-	bottom: i32,
-	top: i32,
+	left: f32,
+	right: f32,
+	bottom: f32,
+	top: f32,
 }
 
-draw_aabb :: proc(aabb: AABB, color: rl.Color) {
-	width := aabb_width(aabb)
-	height := aabb_height(aabb)
-
-	assert(width > 0)
-	assert(height > 0)
-
-	rl.DrawRectangle(
-		aabb.left,
-		aabb.top,
-		width,
-		height,
-		color
-	)
-}
-
-aabb_width :: proc(aabb: AABB) -> i32 {
+aabb_width :: proc(aabb: AABB) -> f32 {
 	return aabb.right - aabb.left
 }
 
-aabb_height :: proc(aabb: AABB) -> i32 {
+aabb_height :: proc(aabb: AABB) -> f32 {
 	return aabb.bottom - aabb.top
+}
+
+aabb_center :: proc(aabb: AABB) -> Point {
+	w := aabb_width(aabb)
+	h := aabb_height(aabb)
+	return Point{
+		x = aabb.left + w / 2,
+		y = aabb.right + h / 2,
+	}
 }
 
 aabb_update_position :: proc(aabb: ^AABB, point: Point) {
@@ -95,7 +85,7 @@ aabb_update_position_with_collision :: proc(aabb: ^AABB, point: Point, aabbs: []
 	aabb^ = result_aabb
 }
 
-aabb_handle_x_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: i32) -> AABB {
+aabb_handle_x_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: f32) -> AABB {
 	assert(diff != 0, "The diff argument should be != 0")
 	result := aabb1
 	width1 := aabb_width(aabb1)
@@ -110,7 +100,7 @@ aabb_handle_x_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: i32) -> AAB
 	return result
 }
 
-aabb_handle_y_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: i32) -> AABB {
+aabb_handle_y_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: f32) -> AABB {
 	assert(diff != 0, "The diff argument should be != 0")
 	result := aabb1
 	height1 := aabb_height(aabb1)

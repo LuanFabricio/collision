@@ -27,6 +27,18 @@ main :: proc() {
 	cont := container.Container{
 		selected_item = nil,
 	}
+
+	container.container_append_aabb(
+		&cont,
+		collision.AABB{
+			left = 32 * 2,
+			right = f32(window.width) - 32 * 2,
+			top = f32(window.height) - 32,
+			bottom = f32(window.height)
+		},
+		rl.GREEN,
+	)
+
 	container.container_append_aabb(
 		&cont,
 		collision.AABB{
@@ -48,17 +60,6 @@ main :: proc() {
 		},
 		rl.RED
 	)
-
-	container.container_append_aabb(
-		&cont,
-		collision.AABB{
-			left = 0,
-			right = f32(window.width),
-			top = f32(window.height) - 32,
-			bottom = f32(window.height)
-		},
-		rl.GREEN,
-	)
 	fmt.printfln("%v", cont.aabb_items[len(cont.aabb_items)-1])
 
 	for !render.should_close() {
@@ -66,14 +67,14 @@ main :: proc() {
 		update_loop(&cont, rl.GetFrameTime())
 
 		aabb_items_len := len(cont.aabb_items)
-		for aabb1, i in cont.aabb_items {
-			for j in i+1..<aabb_items_len {
-				aabb2 := cont.aabb_items[j]
-				if (collision.aabb_check(aabb1, aabb2)) {
-					fmt.printf("Colliding between idxs %d and %d\n", i, j)
-				}
-			}
-		}
+		// for aabb1, i in cont.aabb_items {
+		// 	for j in i+1..<aabb_items_len {
+		// 		aabb2 := cont.aabb_items[j]
+		// 		if (collision.aabb_check(aabb1, aabb2)) {
+		// 			fmt.printf("Colliding between idxs %d and %d\n", i, j)
+		// 		}
+		// 	}
+		// }
 	}
 }
 
@@ -92,22 +93,22 @@ update_loop :: proc(cont: ^container.Container, frame_time: f32) {
 		}
 	}
 
-	if (cont.selected_item != nil) {
+	move_vector := input.input_get_move_vector2()
+	if (cont.selected_item != nil && (move_vector.x != 0 || move_vector.y != 0)) {
 		item := cont.selected_item
-		// collision.aabb_update_position(container.selected_item, mouse)
 		w := collision.aabb_width(item^)
 		h := collision.aabb_height(item^)
+		OBJECT_SPEED :: 320
+		move_vector *= OBJECT_SPEED
 		move_vec := rl.Vector2({
 			f32(item.left + w / 2),
 			f32(item.top + h / 2)
-		}) + input.input_get_move_vector2() * 320 * rl.GetFrameTime()
+		}) +  move_vector * rl.GetFrameTime()
 		collision.aabb_update_position_with_collision(
 			item,
 			collision.vector2_to_point(move_vec),
-			cont.aabb_items[:])
-
-		fmt.printfln("Move vec: %f, %f", move_vec.x, move_vec.y)
-		fmt.printfln("AABB[%p]: %d, %d, %d, %d", item, item.left, item.top, item.right, item.bottom)
+			cont.aabb_items[:]
+		)
 	}
 	for &aabb in cont.aabb_items {
 		physics.apply_gravity_aabb(&aabb, frame_time, cont.aabb_items[:])

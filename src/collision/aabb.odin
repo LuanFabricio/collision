@@ -65,51 +65,63 @@ aabb_update_position_with_collision :: proc(aabb: ^AABB, point: Point, aabbs: []
 		}
 	}
 
-	result_aabb := new_aabb
+	result := new_aabb
 	if collide_with != nil {
-		x_diff := -new_aabb.left + collide_with.left
-		y_diff := -new_aabb.top + collide_with.top
-		if x_diff != 0 && abs(x_diff) >= abs(y_diff) {
-			fixed_aabb := aabb_handle_x_axis_collision(result_aabb, collide_with^, x_diff)
-			if !aabb_check(fixed_aabb, collide_with^) {
-				result_aabb = fixed_aabb
-			}
-		} else if y_diff != 0 && abs(y_diff) > abs(x_diff) {
-			fixed_aabb := aabb_handle_y_axis_collision(result_aabb, collide_with^, y_diff)
-			if !aabb_check(fixed_aabb, collide_with^) {
-				result_aabb = fixed_aabb
-			}
+		result = aabb_collide_update(aabb^, new_aabb, collide_with^)
+	}
+	aabb^ = result
+}
+
+aabb_collide_update :: proc(aabb: AABB, new_aabb: AABB, collided: AABB) -> AABB {
+	result_aabb := new_aabb
+
+	x_diff: f32 = -new_aabb.left + aabb.left
+	y_diff: f32 = -new_aabb.top + aabb.top
+
+	if abs(x_diff) > abs(y_diff) {
+		fixed_aabb := aabb_handle_x_axis_collision(result_aabb, collided, x_diff)
+		if !aabb_check(fixed_aabb, collided) {
+			result_aabb = fixed_aabb
+		}
+	} else {
+		fixed_aabb := aabb_handle_y_axis_collision(result_aabb, collided, y_diff)
+		if !aabb_check(fixed_aabb, collided) {
+			result_aabb = fixed_aabb
 		}
 	}
 
-	aabb^ = result_aabb
+	return result_aabb
 }
 
 aabb_handle_x_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: f32) -> AABB {
-	assert(diff != 0, "The diff argument should be != 0")
+	if diff == 0 {
+		return aabb1
+	}
 	result := aabb1
 	width1 := aabb_width(aabb1)
 	if diff > 0 {
-		result.right = aabb2.left
-		result.left = result.right - width1
-	} else {
 		result.left = aabb2.right
 		result.right = result.left + width1
+	} else {
+		result.right = aabb2.left
+		result.left = result.right - width1
 	}
 
 	return result
 }
 
 aabb_handle_y_axis_collision :: proc(aabb1: AABB, aabb2: AABB, diff: f32) -> AABB {
-	assert(diff != 0, "The diff argument should be != 0")
+	if diff == 0 {
+		return aabb1
+	}
 	result := aabb1
 	height1 := aabb_height(aabb1)
 	if diff > 0 {
-		result.bottom = aabb2.top
-		result.top = result.bottom - height1
-	} else {
 		result.top = aabb2.bottom
 		result.bottom = result.top + height1
+	} else {
+		result.bottom = aabb2.top
+		result.top = result.bottom - height1
 	}
 
 	return result

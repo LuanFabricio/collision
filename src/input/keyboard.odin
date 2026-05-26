@@ -16,9 +16,9 @@ input_get_move_vector2 :: proc() -> rl.Vector2 {
 	move_map[KEY_MOVE_LEFT] = rl.Vector2({-1, 0})
 	move_map[KEY_MOVE_RIGHT] = rl.Vector2({1, 0})
 
-	for key, move in move_map {
+	for key in move_map {
  		if rl.IsKeyDown(key) {
-			move_vector += move
+			move_vector += move_map[key]
 		}
 	}
 

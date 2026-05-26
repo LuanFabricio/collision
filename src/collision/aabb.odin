@@ -20,7 +20,7 @@ aabb_center :: proc(aabb: AABB) -> Point {
 	h := aabb_height(aabb)
 	return Point{
 		x = aabb.left + w / 2,
-		y = aabb.right + h / 2,
+		y = aabb.top + h / 2,
 	}
 }
 

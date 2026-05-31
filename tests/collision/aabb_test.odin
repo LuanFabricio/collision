@@ -1,5 +1,6 @@
 package test_collision
 
+import "core:log"
 import "core:testing"
 import "../../src/collision"
 
@@ -112,30 +113,40 @@ aabb_check_aabb_should_collide :: proc(t: ^testing.T) {
 	testing.expect(t, !collision.aabb_check(aabb1, aabb2))
 }
 
-// TODO: write a test for aabb_update_position_with_collision
 @(test)
 aabb_update_position_with_collision :: proc(t: ^testing.T) {
+	WIDTH :: 42
+	HEIGHT :: 42
+
 	items := []collision.AABB{
 		{
-			left = 0, right = 42,
-			top = 0, bottom = 42,
-		},
-		{
-			left = 21, right = 63,
-			top = 21, bottom = 63,
+			left = 0, right = WIDTH,
+			top = 50, bottom = 50 + HEIGHT,
 		}
 	}
 
-	aabb := &items[0]
-	target := collision.Point{items[1].left, items[1].top}
-	collision.aabb_update_position_with_collision(aabb, target, items)
+	aabb := collision.AABB{
+		left = 1, right = 1 + WIDTH,
+		top = 0, bottom = HEIGHT,
+	}
+	target := collision.Point{aabb.left, aabb.top + 16}
 
-	width := collision.aabb_width(aabb^)
-	height := collision.aabb_height(aabb^)
+	log.infof("aabb before: %v", aabb)
+	original_left := aabb.left
+	original_right := aabb.right
+	collision.aabb_update_position_with_collision(&aabb, target, items)
 
-	aabb2 := items[1]
-	testing.expect_value(t, aabb.top, aabb2.top - height)
+	aabb2 := items[len(items)-1]
+	log.infof("aabb after: %v", aabb)
+	log.infof("aabb2: %v", aabb2)
+
+	testing.expect_value(t, aabb.left, original_left)
+	testing.expect_value(t, aabb.right, original_right)
+	testing.expect_value(t, aabb.top, aabb2.top - HEIGHT)
 	testing.expect_value(t, aabb.bottom, aabb2.top)
-	testing.expect_value(t, aabb.left, aabb2.left - width)
-	testing.expect_value(t, aabb.right, aabb2.left)
 }
+
+//TODO: Create a test case for aabb_update_position_with_collision
+// to test the follwing edgecases:
+// - Collisin between 2 AABBs with the same **left** and **right** values
+// - Collisin between 2 AABBs with the same **top** and **bottom** values

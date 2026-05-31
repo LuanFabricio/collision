@@ -3,8 +3,8 @@ package collision
 AABB :: struct {
 	left: f32,
 	right: f32,
-	bottom: f32,
 	top: f32,
+	bottom: f32,
 }
 
 aabb_width :: proc(aabb: AABB) -> f32 {

@@ -53,7 +53,7 @@ aabb_height_should_diff_between_top_and_bottom :: proc(t: ^testing.T) {
 }
 
 @(test)
-aabb_update_poistion_should_centralize_with_point :: proc(t: ^testing.T) {
+aabb_update_poistion_should_set_left_top_with_point :: proc(t: ^testing.T) {
 	aabb := collision.AABB{
 		left = 0,
 		top = 0,
@@ -68,11 +68,11 @@ aabb_update_poistion_should_centralize_with_point :: proc(t: ^testing.T) {
 
 	collision.aabb_update_position(&aabb, POINT)
 
-	testing.expect_value(t, aabb.left, POINT.x - width / 2)
-	testing.expect_value(t, aabb.right, POINT.x + width / 2)
+	testing.expect_value(t, aabb.left, POINT.x)
+	testing.expect_value(t, aabb.right, POINT.x + width)
 
-	testing.expect_value(t, aabb.top, POINT.y - height / 2)
-	testing.expect_value(t, aabb.bottom, POINT.y + height / 2)
+	testing.expect_value(t, aabb.top, POINT.y)
+	testing.expect_value(t, aabb.bottom, POINT.y + height)
 }
 
 @(test)

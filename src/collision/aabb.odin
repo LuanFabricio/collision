@@ -28,8 +28,8 @@ aabb_update_position :: proc(aabb: ^AABB, point: Point) {
 	width := aabb_width(aabb^)
 	height := aabb_height(aabb^)
 
-	aabb.left = point.x - width / 2
-	aabb.top = point.y - height / 2
+	aabb.left = point.x
+	aabb.top = point.y
 	aabb.right = aabb.left + width
 	aabb.bottom = aabb.top + height
 }

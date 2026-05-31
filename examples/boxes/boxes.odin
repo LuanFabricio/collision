@@ -85,10 +85,7 @@ update_loop :: proc(frame_time: f32) {
 		h := collision.aabb_height(item^)
 		OBJECT_SPEED :: 320
 		move_vector *= OBJECT_SPEED
-		move_vec := rl.Vector2({
-			f32(item.left + w / 2),
-			f32(item.top + h / 2)
-		}) +  move_vector * rl.GetFrameTime()
+		move_vec := rl.Vector2({item.left, item.top}) + move_vector * rl.GetFrameTime()
 		collision.aabb_update_position_with_collision(
 			item,
 			collision.vector2_to_point(move_vec),

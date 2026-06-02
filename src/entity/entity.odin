@@ -2,8 +2,9 @@ package entity
 
 import "core:slice"
 
+import rl "vendor:raylib"
+
 import "../collision"
-import "../input"
 
 Entity :: struct {
 	aabb: collision.AABB,
@@ -11,12 +12,23 @@ Entity :: struct {
 	speed: f32
 }
 
-entity_move :: proc(entity: ^Entity, entities: []Entity, frame_time: f32) {
+World :: struct {
+	entities: [dynamic]Entity,
+	aabbs: [dynamic]collision.AABB,
+	floor: collision.AABB
+}
+
+entity_move :: proc(entity: ^Entity, world: World, frame_time: f32) {
 	new_pos := collision.point_to_vector2(collision.aabb_center(entity.aabb))
 	new_pos += entity.velocity * entity.speed * frame_time
 
+	handle_collision(entity, new_pos, world)
+}
+
+@(private="file")
+handle_collision :: proc(entity: ^Entity, new_pos: rl.Vector2, world: World) {
 	aabbs := slice.mapper(
-		entities,
+		world.entities[:],
 		proc(x: Entity) -> collision.AABB { return x.aabb },
 	)
 	collision.aabb_update_position_with_collision(

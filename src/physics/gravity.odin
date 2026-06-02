@@ -6,7 +6,7 @@ GRAVITY_FORCE :: 100.0
 
 MAX_Y :: 480
 
-apply_gravity_aabb :: proc(aabb: ^collision.AABB, frame_time: f32, aabb_arr: []collision.AABB) {
+apply_gravity_aabb :: proc(aabb: ^collision.AABB, frame_time: f32, aabb_arr: []collision.AABB, max_y: f32 = MAX_Y) {
 	center := collision.Point{aabb.left, aabb.top}
 
 	center.y += GRAVITY_FORCE * frame_time
@@ -14,6 +14,6 @@ apply_gravity_aabb :: proc(aabb: ^collision.AABB, frame_time: f32, aabb_arr: []c
 	height := collision.aabb_height(aabb^)
 	collision.aabb_update_position_with_collision(aabb, center, aabb_arr)
 
-	aabb.bottom = min(MAX_Y, aabb.bottom)
+	aabb.bottom = min(max_y, aabb.bottom)
 	aabb.top = aabb.bottom - height
 }

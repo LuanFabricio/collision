@@ -1,10 +1,10 @@
 package entities
 
 import "core:fmt"
-import "core:log"
 import rl "vendor:raylib"
 import c "../../src/collision"
 import e "../../src/entity"
+import "../../src/input"
 import ex ".."
 import r "../../src/render"
 import "../../src/physics"
@@ -25,12 +25,17 @@ init :: proc(window: r.Window) {
 		speed = 42,
 	})
 
-	append(&world.aabbs, c.AABB{
-		left = 50,
-		right = 82,
-		top = 0,
-		bottom = 32,
-	})
+	aabb_size := []f32{ 32, 32 }
+	for i in 0..<6 {
+		width := aabb_size[0] * f32(i)
+		height := aabb_size[1] * f32(i)
+		append(&world.aabbs, c.AABB{
+			left = 50 + width,
+			right = 82 + width,
+			top = 0,
+			bottom = 32 + height,
+		})
+	}
 
 	world.floor = {
 		left = 0,
@@ -76,10 +81,20 @@ update_loop :: proc(frame_time: f32) {
 
 	}
 
+	move := input.input_get_move_vector2()
+	world.entities[0].velocity.x = move.x * world.entities[0].speed
+	fmt.printfln("Move: %v", move)
+	fmt.printfln("Vel: %v", world.entities[0].velocity)
+
+	if move.y == -1 && world.entities[0].velocity.y > 0 {
+		world.entities[0].velocity.y = -350
+	}
+
 	for &entity in world.entities {
 		// TODO: Use velocty instead apply gravity
-		physics.apply_gravity_aabb(
-			&entity.aabb, frame_time, world.aabbs[:], world.floor.top)
+		physics.apply_gravity_entity(&entity, frame_time)
+		e.entity_move(&entity, world, frame_time)
+		fmt.printfln("Entity: %v", entity)
 	}
 
 	for &aabb in world.aabbs {

@@ -1,8 +1,11 @@
 package physics
 
+import "core:fmt"
 import "../collision"
+import e "../entity"
 
 GRAVITY_FORCE :: 100.0
+MAX_VELOCITY :: 250.0
 
 MAX_Y :: 480
 
@@ -16,4 +19,9 @@ apply_gravity_aabb :: proc(aabb: ^collision.AABB, frame_time: f32, aabb_arr: []c
 
 	aabb.bottom = min(max_y, aabb.bottom)
 	aabb.top = aabb.bottom - height
+}
+
+apply_gravity_entity :: proc(entity: ^e.Entity, frame_time: f32) {
+	entity.velocity.y += 10 * GRAVITY_FORCE * frame_time
+	entity.velocity.y = min(MAX_VELOCITY, entity.velocity.y)
 }

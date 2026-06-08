@@ -1,5 +1,7 @@
 package collision
 
+import "core:fmt"
+import "core:slice"
 AABB :: struct {
 	left: f32,
 	right: f32,
@@ -54,20 +56,19 @@ aabb_update_position_with_collision :: proc(aabb: ^AABB, point: Point, aabbs: []
 	new_aabb := aabb^
 	aabb_update_position(&new_aabb, point)
 
-	collide_with: ^AABB = nil
+	collided_arr: [dynamic]^AABB
 	for &aabb2 in aabbs {
 		if aabb == &aabb2 {
 			continue
 		}
 		if aabb_check(new_aabb, aabb2) {
-			collide_with = &aabb2
-			break
+			append(&collided_arr, &aabb2)
 		}
 	}
 
 	result := new_aabb
-	if collide_with != nil {
-		result = aabb_collide_update(aabb^, new_aabb, collide_with^)
+	for collied_with in collided_arr {
+		result = aabb_collide_update(aabb^, new_aabb, collied_with^)
 	}
 	aabb^ = result
 }
@@ -78,15 +79,29 @@ aabb_collide_update :: proc(aabb: AABB, new_aabb: AABB, collided: AABB) -> AABB 
 	x_diff: f32 = -new_aabb.left + aabb.left
 	y_diff: f32 = -new_aabb.top + aabb.top
 
-	if abs(x_diff) > abs(y_diff) {
-		fixed_aabb := aabb_handle_x_axis_collision(result_aabb, collided, x_diff)
-		if !aabb_check(fixed_aabb, collided) {
-			result_aabb = fixed_aabb
-		}
-	} else {
-		fixed_aabb := aabb_handle_y_axis_collision(result_aabb, collided, y_diff)
-		if !aabb_check(fixed_aabb, collided) {
-			result_aabb = fixed_aabb
+	collision_struct: [2]struct{
+		handler: proc(aabb1: AABB, aabb2: AABB, diff: f32) -> AABB,
+		diff: f32
+	}= {
+		{ aabb_handle_x_axis_collision, x_diff },
+		{ aabb_handle_y_axis_collision, y_diff }
+	}
+
+//	if abs(x_diff) > abs(y_diff) {
+//		slice.reverse(collision_struct[:])
+//	}
+	fmt.printfln("[x_diff]: %v", x_diff)
+	fmt.printfln("[y_diff]: %v", y_diff)
+	fmt.printfln("[aabb_handle_x_axis_collision]: %v", aabb_handle_x_axis_collision)
+	fmt.printfln("[aabb_handle_y_axis_collision]: %v", aabb_handle_y_axis_collision)
+	fmt.printfln("[collided]: %v", collided)
+
+	for collision_struct in collision_struct {
+		fmt.printfln("Struct: %v", collision_struct)
+		result_aabb = collision_struct.handler(result_aabb, collided, collision_struct.diff)
+		fmt.printfln("result_aabb: %v", result_aabb)
+		if !aabb_check(result_aabb, collided) {
+			break
 		}
 	}
 

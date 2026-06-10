@@ -52,6 +52,46 @@ aabb_check :: proc(aabb1: AABB, aabb2: AABB) -> bool {
 	return x_collision && y_collision
 }
 
+aabb_update_x_with_collision :: proc(aabb: ^AABB, x: f32, aabbs: []AABB) {
+	new_aabb := aabb^
+	aabb_update_position(&new_aabb, Point{x, new_aabb.top})
+
+	x_diff := aabb.left - new_aabb.left
+
+	collided_arr: ^AABB = nil
+	for &aabb2 in aabbs {
+		if aabb == &aabb2 {
+			continue
+		}
+		if aabb_check(aabb2, new_aabb) {
+			new_aabb = aabb_handle_x_axis_collision(new_aabb, aabb2,  x_diff)
+			break
+		}
+	}
+
+	aabb^ = new_aabb
+}
+
+aabb_update_y_with_collision :: proc(aabb: ^AABB, y: f32, aabbs: []AABB) {
+	new_aabb := aabb^
+	aabb_update_position(&new_aabb, Point{new_aabb.left, y})
+
+	y_diff := aabb.top - new_aabb.top
+
+	collided_arr: ^AABB = nil
+	for &aabb2 in aabbs {
+		if aabb == &aabb2 {
+			continue
+		}
+		if aabb_check(aabb2, new_aabb) {
+			new_aabb = aabb_handle_y_axis_collision(new_aabb, aabb2,  y_diff)
+			break
+		}
+	}
+
+	aabb^ = new_aabb
+}
+
 aabb_update_position_with_collision :: proc(aabb: ^AABB, point: Point, aabbs: []AABB) {
 	new_aabb := aabb^
 	aabb_update_position(&new_aabb, point)

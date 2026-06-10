@@ -91,7 +91,6 @@ update_loop :: proc(frame_time: f32) {
 	}
 
 	for &entity in world.entities {
-		// TODO: Use velocty instead apply gravity
 		physics.apply_gravity_entity(&entity, frame_time)
 		e.entity_move(&entity, world, frame_time)
 		fmt.printfln("Entity: %v", entity)

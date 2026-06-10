@@ -1,7 +1,7 @@
 package collision
 
 import "core:fmt"
-import "core:slice"
+
 AABB :: struct {
 	left: f32,
 	right: f32,

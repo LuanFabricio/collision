@@ -1,5 +1,6 @@
 package entities
 
+import "core:slice"
 import "core:fmt"
 import rl "vendor:raylib"
 import c "../../src/collision"
@@ -14,13 +15,15 @@ FLOOR_HEIGHT :: 48
 
 @(private="file")
 init :: proc(window: r.Window) {
+	append(&world.aabbs, c.AABB{
+		left = 0,
+		right = 32,
+		top = 0,
+		bottom = 32,
+	})
+
 	append(&world.entities, e.Entity{
-		aabb = c.AABB{
-			left = 0,
-			right = 32,
-			top = 0,
-			bottom = 32,
-		},
+		aabb = 0,
 		velocity = {0, 0},
 		speed = 42,
 	})
@@ -57,12 +60,16 @@ render :: proc(window: r.Window) {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.BLACK)
 
+	entities_aabbs := [dynamic]i32{}
 	for entity in world.entities {
-		r.render_aabb(entity.aabb, rl.BLUE)
+		r.render_aabb(world.aabbs[entity.aabb], rl.BLUE)
+		append(&entities_aabbs, entity.aabb)
 	}
 
-	for aabb in world.aabbs {
-		r.render_aabb(aabb, rl.RED)
+	for aabb, i in world.aabbs {
+		if !slice.contains(entities_aabbs[:], i32(i)) {
+			r.render_aabb(aabb, rl.RED)
+		}
 	}
 
 	r.render_aabb(world.floor, rl.BROWN)

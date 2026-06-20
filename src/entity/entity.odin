@@ -1,9 +1,5 @@
 package entity
 
-import "core:slice"
-
-import rl "vendor:raylib"
-
 import "../collision"
 
 Entity :: struct {
@@ -18,41 +14,53 @@ World :: struct {
 	floor: collision.AABB
 }
 
-Axis :: enum { None, X, Y }
-
 entity_move :: proc(entity: ^Entity, world: World, frame_time: f32) {
-	entity_aabb := world.aabbs[entity.aabb]
-	new_pos := rl.Vector2{entity_aabb.left, entity_aabb.top}
+	velocity_frame := entity.velocity * frame_time
+	new_aabb := world.aabbs[entity.aabb]
+	collided: bool = false
 
-	new_pos.x += entity.velocity.x * frame_time;
-	handle_collision(entity, new_pos, world, Axis.X)
+	aabb_width := collision.aabb_width(new_aabb)
+	new_aabb.left += velocity_frame.x
+	new_aabb.right = new_aabb.left + aabb_width
+	new_aabb, collided = handle_collision_x(entity.aabb, new_aabb, world.aabbs[:])
 
-	new_pos = rl.Vector2{entity_aabb.left, entity_aabb.top}
-	new_pos.y += entity.velocity.y * frame_time;
-	handle_collision(entity, new_pos, world, Axis.Y)
-}
+	aabb_height := collision.aabb_height(new_aabb)
+	new_aabb.top += velocity_frame.y
+	new_aabb.bottom = new_aabb.top + aabb_height
+	new_aabb, _ = handle_collision_y(entity.aabb, new_aabb, world.aabbs[:])
 
-@(private="file")
-handle_collision :: proc(entity: ^Entity, new_pos: rl.Vector2, world: World, axis: Axis = Axis.None) {
-	new_aabb := &world.aabbs[entity.aabb]
-
-	aabbs := world.aabbs
-	#partial switch axis {
-		case Axis.X:
-			collision.aabb_update_x_with_collision(new_aabb, new_pos.x, aabbs[:])
-		case Axis.Y:
-			collision.aabb_update_y_with_collision(new_aabb, new_pos.y, aabbs[:])
-		case:
-			collision.aabb_update_position_with_collision(
-				new_aabb,
-				collision.vector2_to_point(new_pos),
-				aabbs[:]
-			)
-	}
-
-	height := collision.aabb_height(new_aabb^)
+	height := collision.aabb_height(new_aabb)
 	new_aabb.bottom = min(world.floor.top, new_aabb.bottom)
 	new_aabb.top = new_aabb.bottom - height
+	world.aabbs[entity.aabb] = new_aabb
+}
 
-	world.aabbs[entity.aabb] = new_aabb^
+// TODO: Remove bool return
+@(private="file")
+handle_collision_x :: proc(entity_aabb: i32, new_aabb: collision.AABB, aabbs: []collision.AABB) -> (collision.AABB, bool) {
+	for aabb, i in aabbs {
+		if i32(i) == entity_aabb {
+			continue
+		}
+		if collision.aabb_check(aabb, new_aabb) {
+			diff := new_aabb.left - aabb.left
+			return collision.aabb_handle_x_axis_collision(new_aabb, aabb, diff), true
+		}
+	}
+	return new_aabb, false
+}
+
+// TODO: Remove bool return
+@(private="file")
+handle_collision_y :: proc(entity_aabb: i32, new_aabb: collision.AABB, aabbs: []collision.AABB) -> (collision.AABB, bool) {
+	for aabb, i in aabbs {
+		if i32(i) == entity_aabb {
+			continue
+		}
+		if collision.aabb_check(aabb, new_aabb) {
+			diff := new_aabb.top - aabb.top
+			return collision.aabb_handle_y_axis_collision(new_aabb, aabb, diff), true
+		}
+	}
+	return new_aabb, false
 }

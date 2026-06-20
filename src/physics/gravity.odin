@@ -1,6 +1,5 @@
 package physics
 
-import "core:fmt"
 import "../collision"
 import e "../entity"
 

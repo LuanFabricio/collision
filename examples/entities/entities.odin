@@ -97,13 +97,21 @@ update_loop :: proc(frame_time: f32) {
 		world.entities[0].velocity.y = -350
 	}
 
+	entities_aabbs := [dynamic]int{}
 	for &entity in world.entities {
 		physics.apply_gravity_entity(&entity, frame_time)
 		e.entity_move(&entity, world, frame_time)
 		fmt.printfln("Entity: %v", entity)
+
+		// NOTE: Just mapping entities AABBs
+		append(&entities_aabbs, int(entity.aabb))
 	}
 
-	for &aabb in world.aabbs {
+	for &aabb, i in world.aabbs {
+		if slice.contains(entities_aabbs[:], i) {
+			continue
+		}
+
 		physics.apply_gravity_aabb(&aabb, frame_time, world.aabbs[:], world.floor.top)
 
 		height := c.aabb_height(aabb)

@@ -1,7 +1,5 @@
 package entity
 
-import "core:slice"
-import "core:fmt"
 import "../collision"
 
 Entity :: struct {
@@ -11,7 +9,7 @@ Entity :: struct {
 	speed: f32,
 }
 
-entity_move :: proc(entity: ^Entity, world: World, frame_time: f32) {
+entity_move :: proc(entity: ^Entity, world: World, frame_time: f32, collide_with_floor: bool = true) {
 	velocity_frame := entity.velocity * frame_time
 	new_aabb := world.aabbs[entity.aabb]
 	collided: bool = false
@@ -26,9 +24,11 @@ entity_move :: proc(entity: ^Entity, world: World, frame_time: f32) {
 	new_aabb.bottom = new_aabb.top + aabb_height
 	new_aabb, _ = handle_collision_y(entity.aabb, new_aabb, world.aabbs[:])
 
-	height := collision.aabb_height(new_aabb)
-	new_aabb.bottom = min(world.floor.top, new_aabb.bottom)
-	new_aabb.top = new_aabb.bottom - height
+	if collide_with_floor {
+		height := collision.aabb_height(new_aabb)
+		new_aabb.bottom = min(world.floor.top, new_aabb.bottom)
+		new_aabb.top = new_aabb.bottom - height
+	}
 	world.aabbs[entity.aabb] = new_aabb
 }
 

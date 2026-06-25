@@ -8,6 +8,7 @@ import "src/render"
 import "examples"
 import "examples/boxes"
 import "examples/entities"
+import "examples/topdown"
 
 WINDOW_WIDTH :: 720
 WINDOW_HEIGHT :: 480
@@ -18,6 +19,7 @@ main :: proc() {
 
 	scene: examples.Scene = boxes.get_scene()
 	scene = entities.get_scene()
+	scene = topdown.get_scene()
 	window := render.Window{
 		width = WINDOW_WIDTH,
 		height = WINDOW_HEIGHT,

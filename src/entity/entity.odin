@@ -1,17 +1,14 @@
 package entity
 
+import "core:slice"
+import "core:fmt"
 import "../collision"
 
 Entity :: struct {
 	aabb: i32,
+	color: i32,
 	velocity: [2]f32,
-	speed: f32
-}
-
-World :: struct {
-	entities: [dynamic]Entity,
-	aabbs: [dynamic]collision.AABB,
-	floor: collision.AABB
+	speed: f32,
 }
 
 entity_move :: proc(entity: ^Entity, world: World, frame_time: f32) {

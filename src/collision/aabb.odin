@@ -7,6 +7,7 @@ AABB :: struct {
 	right: f32,
 	top: f32,
 	bottom: f32,
+	mass: f32,
 }
 
 aabb_width :: proc(aabb: AABB) -> f32 {

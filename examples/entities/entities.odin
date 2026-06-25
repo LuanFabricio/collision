@@ -15,18 +15,23 @@ FLOOR_HEIGHT :: 48
 
 @(private="file")
 init :: proc(window: r.Window) {
-	append(&world.aabbs, c.AABB{
-		left = 0,
-		right = 32,
-		top = 0,
-		bottom = 32,
-	})
 
-	append(&world.entities, e.Entity{
-		aabb = 0,
-		velocity = {0, 0},
-		speed = 42,
-	})
+	e.world_add_entity(
+		&world,
+		e.Entity{
+			aabb = 0,
+			velocity = {0, 0},
+			speed = 42,
+		},
+		c.AABB{
+			left = 0,
+			right = 32,
+			top = 0,
+			bottom = 32,
+			mass = 1.0,
+		},
+		rl.Color{0xff, 0xff, 0xff, 0xff},
+	)
 
 	aabb_size := []f32{ 32, 32 }
 	for i in 0..<6 {
@@ -37,6 +42,7 @@ init :: proc(window: r.Window) {
 			right = 82 + width,
 			top = 0,
 			bottom = 32 + height,
+			mass = 0.0,
 		})
 	}
 
@@ -45,12 +51,29 @@ init :: proc(window: r.Window) {
 		right = f32(window.width),
 		top = f32(window.height - FLOOR_HEIGHT),
 		bottom = f32(window.height),
+		mass = 0,
 	}
+
+	append(&world.aabbs, c.AABB{
+		left = 50,
+		right = 82,
+		top = world.floor.top - 32,
+		bottom = world.floor.top,
+		mass = 0.0,
+	})
+
+	append(&world.aabbs, c.AABB{
+		left = 140,
+		right = 172,
+		top = world.floor.top - 32,
+		bottom = world.floor.top,
+		mass = 0.0,
+	})
 }
 
 @(private="file")
 deinit :: proc() {
-	world.floor = {0, 0, 0, 0}
+	world.floor = {0, 0, 0, 0, 99999}
 	delete(world.aabbs)
 	delete(world.entities)
 }
@@ -62,7 +85,7 @@ render :: proc(window: r.Window) {
 
 	entities_aabbs := [dynamic]i32{}
 	for entity in world.entities {
-		r.render_aabb(world.aabbs[entity.aabb], rl.BLUE)
+		r.render_aabb(world.aabbs[entity.aabb], world.colors[entity.color])
 		append(&entities_aabbs, entity.aabb)
 	}
 
@@ -107,6 +130,7 @@ update_loop :: proc(frame_time: f32) {
 		append(&entities_aabbs, int(entity.aabb))
 	}
 
+	/*
 	for &aabb, i in world.aabbs {
 		if slice.contains(entities_aabbs[:], i) {
 			continue
@@ -118,6 +142,7 @@ update_loop :: proc(frame_time: f32) {
 		aabb.bottom = min(world.floor.top, aabb.bottom)
 		aabb.top = aabb.bottom - height
 	}
+	*/
 }
 
 get_scene :: proc() -> ex.Scene {

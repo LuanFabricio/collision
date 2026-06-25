@@ -28,6 +28,7 @@ init :: proc(window: r.Window) {
 			right = 32,
 			top = 0,
 			bottom = 32,
+			mass = 1.0,
 		},
 		rl.Color{0xff, 0xff, 0xff, 0xff},
 	)
@@ -41,6 +42,7 @@ init :: proc(window: r.Window) {
 			right = 82 + width,
 			top = 0,
 			bottom = 32 + height,
+			mass = 0.0,
 		})
 	}
 
@@ -49,6 +51,7 @@ init :: proc(window: r.Window) {
 		right = f32(window.width),
 		top = f32(window.height - FLOOR_HEIGHT),
 		bottom = f32(window.height),
+		mass = 0,
 	}
 
 	append(&world.aabbs, c.AABB{
@@ -56,6 +59,7 @@ init :: proc(window: r.Window) {
 		right = 82,
 		top = world.floor.top - 32,
 		bottom = world.floor.top,
+		mass = 0.0,
 	})
 
 	append(&world.aabbs, c.AABB{
@@ -63,12 +67,13 @@ init :: proc(window: r.Window) {
 		right = 172,
 		top = world.floor.top - 32,
 		bottom = world.floor.top,
+		mass = 0.0,
 	})
 }
 
 @(private="file")
 deinit :: proc() {
-	world.floor = {0, 0, 0, 0}
+	world.floor = {0, 0, 0, 0, 99999}
 	delete(world.aabbs)
 	delete(world.entities)
 }
